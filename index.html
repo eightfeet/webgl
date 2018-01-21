@@ -45,8 +45,8 @@
 			
             function handle_load(geometry, materials) {
 
-				var texture = new THREE.TextureLoader().load( 'pic.jpeg', function(){
-
+				var texture = new THREE.TextureLoader().load( 'prd.jpg', function(texture){
+					console.log('??', texture);
 					console.log(2, geometry)
 					scene = new THREE.Scene();
 					scene.background = new THREE.Color( 0xcccccc );
@@ -66,9 +66,13 @@
 					//controls.dampingFactor = 0.25;
 					controls.enableZoom = false;
 
-					// var material = new THREE.MeshLambertMaterial({morphTargets: true});
-					var material = new THREE.MeshLambertMaterial({ map: texture});
-					// var material = new THREE.MeshBasicMaterial( { map: texture} );
+					
+
+					var material = new THREE.MeshLambertMaterial({
+						map: texture,
+						shading: THREE.FlatShading,
+						side: THREE.FrontSide
+					});
 
 					var mesh = new THREE.Mesh( geometry, material );
 					
