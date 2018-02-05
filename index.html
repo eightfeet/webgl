@@ -57,12 +57,13 @@
 					
 					var container = document.getElementById( 'container' );
 					container.appendChild( renderer.domElement );
-					camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-					camera.position.z = 20;
+					camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 1000 );
+					camera.position.z = 23;
+					camera.position.y = 5;
 					controls = new THREE.OrbitControls( camera, renderer.domElement );
 					controls.addEventListener( 'change', render ); // remove when using animation loop
 					// enable animation loop when using damping or autorotation
-					//controls.enableDamping = true;
+					controls.enableDamping = true;
 					//controls.dampingFactor = 0.25;
 					controls.enableZoom = false;
 
@@ -82,6 +83,30 @@
 					mesh.updateMatrix();
 					mesh.matrixAutoUpdate = false;
 					scene.add( mesh );
+
+
+					// 条形码的触发对象
+					var barCodeGeometry = new THREE.PlaneGeometry( 1, 2.6, 1 );
+					var barCodeMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.DoubleSide, transparent: true, opacity:0.1 } );
+					var barCodePlane = new THREE.Mesh( barCodeGeometry, barCodeMaterial );
+					barCodePlane.name = 'barCode';
+					barCodePlane.position.x = -2.25;
+					barCodePlane.position.y = 0.1;
+					barCodePlane.position.z = 1.5;
+					barCodePlane.rotation.y = 2.1;
+					scene.add( barCodePlane );
+
+					// 防伪码的触发对象
+					var SecurityGeometry = new THREE.CircleGeometry( 1.6, 32 );
+					var SecurityMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent: true, opacity:0.1 } );
+					var SecurityCircle = new THREE.Mesh( SecurityGeometry, SecurityMaterial );
+					SecurityCircle.name = 'Security';
+					SecurityCircle.position.x = -0.1;
+					SecurityCircle.position.y = 8.87;
+					SecurityCircle.position.z = 0.055;
+					SecurityCircle.rotation.x = -1.55;
+					scene.add( SecurityCircle );
+
 					onWindowResize();
 					
 
@@ -95,7 +120,8 @@
 					var light = new THREE.AmbientLight( 0x888888 );
 					scene.add( light );
 					//
-					window.addEventListener( 'resize', onWindowResize, false );
+					document.addEventListener( 'resize', onWindowResize, false );
+					document.addEventListener('mousedown', onDocumentMouseDown, false);
 					
 					function onWindowResize() {
 						camera.aspect = window.innerWidth / window.innerHeight;
@@ -109,6 +135,27 @@
 					}
 					function render() {
 						renderer.render( scene, camera );
+					}
+
+					// 创建点击事件
+					function onDocumentMouseDown(event) {
+
+						var vector = new THREE.Vector3(( event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 0.5);
+						vector = vector.unproject(camera);
+
+						var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+
+						var intersects = raycaster.intersectObjects([barCodePlane, SecurityCircle]);
+						// console.log(intersects.length)
+						if (intersects.length > 0) {
+							var objName = intersects[0].object.name;
+							if (objName === 'barCode') {
+								window.alert('点击条形码');
+							}
+							if (objName === 'Security') {
+								window.alert('点击防伪码');
+							}
+						}
 					}
 
 					render();
