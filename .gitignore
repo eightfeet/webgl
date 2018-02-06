@@ -1,0 +1,9 @@
+/node_modules
+/npm-debug.log
+/build
+*.psd
+*.eps
+/coverage
+/.idea
+yarn.lock
+/.vscode
