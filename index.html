@@ -35,6 +35,39 @@
 		<script src="unit/Detector.js"></script>
         
 		<script>
+
+		/* requestAnimationFrame.js
+			* by zhangxinxu 2013-09-30
+		*/
+		(function() {
+			var lastTime = 0;
+			var vendors = ['webkit', 'moz'];
+			for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+				window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+				window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] ||    // name has changed in Webkit
+											window[vendors[x] + 'CancelRequestAnimationFrame'];
+			}
+
+			if (!window.requestAnimationFrame) {
+				window.requestAnimationFrame = function(callback, element) {
+					var currTime = new Date().getTime();
+					var timeToCall = Math.max(0, 16.7 - (currTime - lastTime));
+					var id = window.setTimeout(function() {
+						callback(currTime + timeToCall);
+					}, timeToCall);
+					lastTime = currTime + timeToCall;
+					return id;
+				};
+			}
+			if (!window.cancelAnimationFrame) {
+				window.cancelAnimationFrame = function(id) {
+					clearTimeout(id);
+				};
+			}
+		}());
+
+
+
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
             var camera, controls, scene, renderer;
             // world
@@ -46,9 +79,6 @@
             function handle_load(geometry, materials) {
 
 				var texture = new THREE.TextureLoader().load( 'prdfix.png', function(texture){
-					console.log('??', texture);
-					console.log(2, geometry)
-					console.log(3, materials)
 					
 					scene = new THREE.Scene();
 					scene.background = new THREE.Color( 0xcccccc );
@@ -69,17 +99,6 @@
 					//controls.dampingFactor = 0.25;
 					controls.enableZoom = true;
 
-
-					// var material = new THREE.MeshStandardMaterial({
-					// 	map: texture,
-					// 	shading: THREE.FlatShading,
-					// 	side: THREE.FrontSide,
-					// 	// wireframe: true
-					// 	envMaps: 'feflection'
-					// });
-
-
-
 					var material = new THREE.MeshPhysicalMaterial( {
 						map: texture,
 						metalness: 0,
@@ -89,9 +108,6 @@
 						reflectivity: 0.1,
 					} );
 
-					console.log(33333, geometry);
-					geometry.colors = [0xff0000];
-
 					var mesh = new THREE.Mesh( geometry, material );
 					
 					mesh.position.x = 3;
@@ -99,6 +115,7 @@
 					mesh.position.z = 0;
 					mesh.updateMatrix();
 					mesh.matrixAutoUpdate = false;
+
 					scene.add( mesh );
 
 
@@ -145,9 +162,17 @@
 						camera.updateProjectionMatrix();
 						renderer.setSize( window.innerWidth, window.innerHeight );
 					}
+					var O = 0;
 					function animate() {
 						requestAnimationFrame( animate );
 						controls.update(); // required if controls.enableDamping = true, or if controls.autoRotate = true
+						
+						SecurityCircle.material.opacity = barCodePlane.material.opacity = O/1000;
+						O++;
+						if (O >= 100) {
+							O = 0;
+						}
+						// mesh.scale.x = Math.random();
 						render();
 					}
 					function render() {
@@ -174,29 +199,12 @@
 							}
 						}
 					}
-
-					render();
+					animate();
+					// render();
 				});
 				
                 
             }
-
-			// // init();
-            // render(); // remove when using next line for animation loop (requestAnimationFrame)
-            
-
-			// //animate();
-			// // function init() {
-                
-				
-				
-            // // }
-            
-
-				
-
-
-
 
 			
 		</script>
